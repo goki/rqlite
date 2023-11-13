@@ -2,8 +2,10 @@
 package stdlib
 
 import (
+	"context"
 	"database/sql"
 	"database/sql/driver"
+	"log/slog"
 
 	"github.com/rqlite/gorqlite"
 )
@@ -60,7 +62,23 @@ func (s *Stmt) Exec(args []driver.Value) (driver.Result, error) {
 	stmt := gorqlite.ParameterizedStatement{Query: s.Stmt, Arguments: a}
 	wr, err := s.Conn.WriteOneParameterized(stmt)
 	if err != nil {
-		return nil, err
+		return &Result{wr}, err
+	}
+	return &Result{wr}, nil
+}
+
+func (s *Stmt) ExecContext(ctx context.Context, args []driver.NamedValue) (driver.Result, error) {
+	a := make([]any, len(args))
+	for _, v := range args {
+		if v.Name != "" {
+			slog.Error("rqlite: Stmt.ExecContext: rqlite sql driver does not support named parameters, but got one", "name", v.Name, "value", v.Value)
+		}
+		a[v.Ordinal] = v.Value
+	}
+	stmt := gorqlite.ParameterizedStatement{Query: s.Stmt, Arguments: a}
+	wr, err := s.Conn.WriteOneParameterizedContext(ctx, stmt)
+	if err != nil {
+		return &Result{wr}, err
 	}
 	return &Result{wr}, nil
 }
@@ -73,7 +91,23 @@ func (s *Stmt) Query(args []driver.Value) (driver.Rows, error) {
 	stmt := gorqlite.ParameterizedStatement{Query: s.Stmt, Arguments: a}
 	qr, err := s.Conn.QueryOneParameterized(stmt)
 	if err != nil {
-		return nil, err
+		return &Rows{qr}, err
+	}
+	return &Rows{qr}, nil
+}
+
+func (s *Stmt) QueryContext(ctx context.Context, args []driver.NamedValue) (driver.Rows, error) {
+	a := make([]any, len(args))
+	for _, v := range args {
+		if v.Name != "" {
+			slog.Error("rqlite: Stmt.QueryContext: rqlite sql driver does not support named parameters, but got one", "name", v.Name, "value", v.Value)
+		}
+		a[v.Ordinal] = v.Value
+	}
+	stmt := gorqlite.ParameterizedStatement{Query: s.Stmt, Arguments: a}
+	qr, err := s.Conn.QueryOneParameterizedContext(ctx, stmt)
+	if err != nil {
+		return &Rows{qr}, err
 	}
 	return &Rows{qr}, nil
 }
