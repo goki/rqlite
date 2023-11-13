@@ -29,7 +29,7 @@ type Conn struct {
 }
 
 func (c *Conn) Prepare(query string) (driver.Stmt, error) {
-	return nil, nil
+	return &Stmt{Stmt: query, Conn: c}, nil
 }
 
 func (c *Conn) Close() error {
@@ -45,6 +45,10 @@ type Stmt struct {
 	Stmt string
 	Conn *Conn
 }
+
+// these aren't checked automatically anywhere else, so we check them here
+var _ driver.StmtExecContext = (*Stmt)(nil)
+var _ driver.StmtQueryContext = (*Stmt)(nil)
 
 func (s *Stmt) Close() error {
 	return nil
