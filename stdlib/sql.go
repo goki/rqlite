@@ -53,11 +53,29 @@ func (s *Stmt) NumInput() int {
 }
 
 func (s *Stmt) Exec(args []driver.Value) (driver.Result, error) {
-	wr, err := s.Conn.WriteOne(s.Stmt)
+	a := make([]any, len(args))
+	for i, v := range args {
+		a[i] = v
+	}
+	stmt := gorqlite.ParameterizedStatement{Query: s.Stmt, Arguments: a}
+	wr, err := s.Conn.WriteOneParameterized(stmt)
 	if err != nil {
 		return nil, err
 	}
 	return &Result{wr}, nil
+}
+
+func (s *Stmt) Query(args []driver.Value) (driver.Rows, error) {
+	a := make([]any, len(args))
+	for i, v := range args {
+		a[i] = v
+	}
+	stmt := gorqlite.ParameterizedStatement{Query: s.Stmt, Arguments: a}
+	qr, err := s.Conn.QueryOneParameterized(stmt)
+	if err != nil {
+		return nil, err
+	}
+	return &Rows{qr}, nil
 }
 
 type Result struct {
@@ -70,4 +88,28 @@ func (r *Result) LastInsertId() (int64, error) {
 
 func (r *Result) RowsAffected() (int64, error) {
 	return r.WriteResult.RowsAffected, r.WriteResult.Err
+}
+
+type Rows struct {
+	gorqlite.QueryResult
+}
+
+func (r *Rows) Columns() []string {
+	return r.QueryResult.Columns()
+}
+
+func (r *Rows) Close() error {
+	return r.Err
+}
+
+func (r *Rows) Next(dest []driver.Value) error {
+	ok := r.QueryResult.Next()
+	if !ok {
+		return nil
+	}
+	a := make([]any, len(dest))
+	for i, v := range dest {
+		a[i] = v
+	}
+	return r.QueryResult.Scan(a...)
 }
