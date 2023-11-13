@@ -39,7 +39,19 @@ func (c *Conn) Close() error {
 }
 
 func (c *Conn) Begin() (driver.Tx, error) {
-	return nil, nil
+	return &Tx{}, nil
+}
+
+type Tx struct{}
+
+func (tx *Tx) Commit() error {
+	// no-op
+	return nil
+}
+
+func (tx *Tx) Rollback() error {
+	// no-op
+	return nil
 }
 
 type Stmt struct {
