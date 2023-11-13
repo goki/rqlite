@@ -2,10 +2,15 @@
 package stdlib
 
 import (
+	"database/sql"
 	"database/sql/driver"
 
 	"github.com/rqlite/gorqlite"
 )
+
+func init() {
+	sql.Register("rqlite", &Driver{})
+}
 
 type Driver struct{}
 
@@ -32,4 +37,37 @@ func (c *Conn) Close() error {
 
 func (c *Conn) Begin() (driver.Tx, error) {
 	return nil, nil
+}
+
+type Stmt struct {
+	Stmt string
+	Conn *Conn
+}
+
+func (s *Stmt) Close() error {
+	return nil
+}
+
+func (s *Stmt) NumInput() int {
+	return -1
+}
+
+func (s *Stmt) Exec(args []driver.Value) (driver.Result, error) {
+	wr, err := s.Conn.WriteOne(s.Stmt)
+	if err != nil {
+		return nil, err
+	}
+	return &Result{wr}, nil
+}
+
+type Result struct {
+	gorqlite.WriteResult
+}
+
+func (r *Result) LastInsertId() (int64, error) {
+	return r.WriteResult.LastInsertID, r.WriteResult.Err
+}
+
+func (r *Result) RowsAffected() (int64, error) {
+	return r.WriteResult.RowsAffected, r.WriteResult.Err
 }
