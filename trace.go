@@ -22,5 +22,4 @@ func TraceOn(w io.Writer) {
 // info is sent to the io.Writer, unless it is TraceOn'd again.
 func TraceOff() {
 	gorqlite.TraceOff()
-
 }
