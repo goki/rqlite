@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"database/sql/driver"
+	"io"
 	"log/slog"
 
 	"github.com/rqlite/gorqlite"
@@ -143,7 +144,7 @@ func (r *Rows) Close() error {
 func (r *Rows) Next(dest []driver.Value) error {
 	ok := r.QueryResult.Next()
 	if !ok {
-		return nil
+		return io.EOF
 	}
 	a := make([]any, len(dest))
 	for i, v := range dest {
