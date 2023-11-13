@@ -146,9 +146,14 @@ func (r *Rows) Next(dest []driver.Value) error {
 	if !ok {
 		return io.EOF
 	}
-	a := make([]any, len(dest))
-	for i, v := range dest {
-		a[i] = v
+	// in Next, we are copying the value into the destination
+	// slice, not directly scanning them
+	values, err := r.QueryResult.Values()
+	if err != nil {
+		return err
 	}
-	return r.QueryResult.Scan(a...)
+	for i, v := range values {
+		dest[i] = v
+	}
+	return nil
 }
