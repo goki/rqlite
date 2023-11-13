@@ -44,7 +44,7 @@ func (dialector Dialector) Initialize(db *gorm.DB) (err error) {
 		if err != nil {
 			return err
 		}
-		db.ConnPool = conn
+		db.ConnPool = &ConnPool{conn}
 	}
 
 	var version string
