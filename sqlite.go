@@ -2,12 +2,11 @@ package sqlite
 
 import (
 	"context"
+	"database/sql"
 	"strconv"
 
 	"gorm.io/gorm/callbacks"
 
-	_ "github.com/mattn/go-sqlite3"
-	"github.com/rqlite/gorqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/logger"
@@ -40,11 +39,11 @@ func (dialector Dialector) Initialize(db *gorm.DB) (err error) {
 	if dialector.Conn != nil {
 		db.ConnPool = dialector.Conn
 	} else {
-		conn, err := gorqlite.Open(dialector.DSN)
+		conn, err := sql.Open(dialector.DriverName, dialector.DSN)
 		if err != nil {
 			return err
 		}
-		db.ConnPool = &ConnPool{conn}
+		db.ConnPool = conn
 	}
 
 	var version string
