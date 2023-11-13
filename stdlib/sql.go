@@ -77,7 +77,7 @@ func (s *Stmt) ExecContext(ctx context.Context, args []driver.NamedValue) (drive
 		if v.Name != "" {
 			slog.Error("rqlite: Stmt.ExecContext: rqlite sql driver does not support named parameters, but got one", "name", v.Name, "value", v.Value)
 		}
-		a[v.Ordinal] = v.Value
+		a[v.Ordinal-1] = v.Value
 	}
 	stmt := gorqlite.ParameterizedStatement{Query: s.Stmt, Arguments: a}
 	wr, err := s.Conn.WriteOneParameterizedContext(ctx, stmt)
@@ -106,7 +106,7 @@ func (s *Stmt) QueryContext(ctx context.Context, args []driver.NamedValue) (driv
 		if v.Name != "" {
 			slog.Error("rqlite: Stmt.QueryContext: rqlite sql driver does not support named parameters, but got one", "name", v.Name, "value", v.Value)
 		}
-		a[v.Ordinal] = v.Value
+		a[v.Ordinal-1] = v.Value
 	}
 	stmt := gorqlite.ParameterizedStatement{Query: s.Stmt, Arguments: a}
 	qr, err := s.Conn.QueryOneParameterizedContext(ctx, stmt)
