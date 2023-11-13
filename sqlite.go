@@ -2,12 +2,12 @@ package sqlite
 
 import (
 	"context"
-	"database/sql"
 	"strconv"
 
 	"gorm.io/gorm/callbacks"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/rqlite/gorqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/logger"
@@ -15,8 +15,8 @@ import (
 	"gorm.io/gorm/schema"
 )
 
-// DriverName is the default driver name for SQLite.
-const DriverName = "sqlite3"
+// DriverName is the default driver name for RQLite.
+const DriverName = "rqlite"
 
 type Dialector struct {
 	DriverName string
@@ -29,7 +29,7 @@ func Open(dsn string) gorm.Dialector {
 }
 
 func (dialector Dialector) Name() string {
-	return "sqlite"
+	return "rqlite"
 }
 
 func (dialector Dialector) Initialize(db *gorm.DB) (err error) {
@@ -40,7 +40,7 @@ func (dialector Dialector) Initialize(db *gorm.DB) (err error) {
 	if dialector.Conn != nil {
 		db.ConnPool = dialector.Conn
 	} else {
-		conn, err := sql.Open(dialector.DriverName, dialector.DSN)
+		conn, err := gorqlite.Open(dialector.DSN)
 		if err != nil {
 			return err
 		}
