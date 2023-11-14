@@ -1,11 +1,8 @@
 package rqlite
 
 import (
-	"context"
 	"database/sql"
 	"strconv"
-
-	"gorm.io/gorm/callbacks"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -48,23 +45,25 @@ func (dialector Dialector) Initialize(db *gorm.DB) (err error) {
 		db.ConnPool = conn
 	}
 
-	var version string
-	if err := db.ConnPool.QueryRowContext(context.Background(), "select sqlite_version()").Scan(&version); err != nil {
-		return err
-	}
-	// https://www.sqlite.org/releaselog/3_35_0.html
-	if compareVersion(version, "3.35.0") >= 0 {
-		callbacks.RegisterDefaultCallbacks(db, &callbacks.Config{
-			CreateClauses:        []string{"INSERT", "VALUES", "ON CONFLICT", "RETURNING"},
-			UpdateClauses:        []string{"UPDATE", "SET", "FROM", "WHERE", "RETURNING"},
-			DeleteClauses:        []string{"DELETE", "FROM", "WHERE", "RETURNING"},
-			LastInsertIDReversed: true,
-		})
-	} else {
-		callbacks.RegisterDefaultCallbacks(db, &callbacks.Config{
-			LastInsertIDReversed: true,
-		})
-	}
+	// TODO(kai/rqlite): support RETURNING once https://github.com/rqlite/rqlite/issues/1157 is resolved
+
+	// var version string
+	// if err := db.ConnPool.QueryRowContext(context.Background(), "select sqlite_version()").Scan(&version); err != nil {
+	// 	return err
+	// }
+	// // https://www.sqlite.org/releaselog/3_35_0.html
+	// if compareVersion(version, "3.35.0") >= 0 {
+	// 	callbacks.RegisterDefaultCallbacks(db, &callbacks.Config{
+	// 		CreateClauses:        []string{"INSERT", "VALUES", "ON CONFLICT", "RETURNING"},
+	// 		UpdateClauses:        []string{"UPDATE", "SET", "FROM", "WHERE", "RETURNING"},
+	// 		DeleteClauses:        []string{"DELETE", "FROM", "WHERE", "RETURNING"},
+	// 		LastInsertIDReversed: true,
+	// 	})
+	// } else {
+	// 	callbacks.RegisterDefaultCallbacks(db, &callbacks.Config{
+	// 		LastInsertIDReversed: true,
+	// 	})
+	// }
 
 	for k, v := range dialector.ClauseBuilders() {
 		db.ClauseBuilders[k] = v

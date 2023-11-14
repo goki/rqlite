@@ -106,9 +106,7 @@ func (s *Stmt) Query(args []driver.Value) (driver.Rows, error) {
 		a[i] = v
 	}
 	stmt := gorqlite.ParameterizedStatement{Query: s.Stmt, Arguments: a}
-	// we do not know whether the query also needs to modify the database,
-	// so we must always use the unified API
-	qr, err := s.Conn.UnifiedOneParameterized(stmt)
+	qr, err := s.Conn.QueryOneParameterized(stmt)
 	if err != nil {
 		return &Rows{qr}, err
 	}
@@ -124,9 +122,7 @@ func (s *Stmt) QueryContext(ctx context.Context, args []driver.NamedValue) (driv
 		a[v.Ordinal-1] = v.Value
 	}
 	stmt := gorqlite.ParameterizedStatement{Query: s.Stmt, Arguments: a}
-	// we do not know whether the query also needs to modify the database,
-	// so we must always use the unified API
-	qr, err := s.Conn.UnifiedOneParameterizedContext(ctx, stmt)
+	qr, err := s.Conn.QueryOneParameterizedContext(ctx, stmt)
 	if err != nil {
 		return &Rows{qr}, err
 	}
