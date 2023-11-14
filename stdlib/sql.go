@@ -72,7 +72,7 @@ func (s *Stmt) NumInput() int {
 }
 
 func (s *Stmt) Exec(args []driver.Value) (driver.Result, error) {
-	a := make([]any, len(args))
+	a := make([]interface{}, len(args))
 	for i, v := range args {
 		a[i] = v
 	}
@@ -85,7 +85,7 @@ func (s *Stmt) Exec(args []driver.Value) (driver.Result, error) {
 }
 
 func (s *Stmt) ExecContext(ctx context.Context, args []driver.NamedValue) (driver.Result, error) {
-	a := make([]any, len(args))
+	a := make([]interface{}, len(args))
 	for _, v := range args {
 		if v.Name != "" {
 			slog.Error("rqlite: Stmt.ExecContext: rqlite sql driver does not support named parameters, but got one", "name", v.Name, "value", v.Value)
@@ -101,7 +101,7 @@ func (s *Stmt) ExecContext(ctx context.Context, args []driver.NamedValue) (drive
 }
 
 func (s *Stmt) Query(args []driver.Value) (driver.Rows, error) {
-	a := make([]any, len(args))
+	a := make([]interface{}, len(args))
 	for i, v := range args {
 		a[i] = v
 	}
@@ -114,7 +114,7 @@ func (s *Stmt) Query(args []driver.Value) (driver.Rows, error) {
 }
 
 func (s *Stmt) QueryContext(ctx context.Context, args []driver.NamedValue) (driver.Rows, error) {
-	a := make([]any, len(args))
+	a := make([]interface{}, len(args))
 	for _, v := range args {
 		if v.Name != "" {
 			slog.Error("rqlite: Stmt.QueryContext: rqlite sql driver does not support named parameters, but got one", "name", v.Name, "value", v.Value)
@@ -160,11 +160,11 @@ func (r *Rows) Next(dest []driver.Value) error {
 	}
 	// in Next, we are copying the value into the destination
 	// slice, not directly scanning them
-	values, err := r.QueryResult.Values()
+	slice, err := r.QueryResult.Slice()
 	if err != nil {
 		return err
 	}
-	for i, v := range values {
+	for i, v := range slice {
 		dest[i] = v
 	}
 	return nil
