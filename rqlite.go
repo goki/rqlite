@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/callbacks"
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/migrator"
@@ -60,9 +61,9 @@ func (dialector Dialector) Initialize(db *gorm.DB) (err error) {
 	// 		LastInsertIDReversed: true,
 	// 	})
 	// } else {
-	// 	callbacks.RegisterDefaultCallbacks(db, &callbacks.Config{
-	// 		LastInsertIDReversed: true,
-	// 	})
+	callbacks.RegisterDefaultCallbacks(db, &callbacks.Config{
+		LastInsertIDReversed: true,
+	})
 	// }
 
 	for k, v := range dialector.ClauseBuilders() {
