@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm/migrator"
 	"gorm.io/gorm/schema"
 
-	_ "goki.dev/rqlite/stdlib"
+	_ "github.com/rqlite/gorqlite/stdlib"
 )
 
 // DriverName is the default driver name for RQLite.
